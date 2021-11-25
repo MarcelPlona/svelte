@@ -3,13 +3,6 @@
     import Properties from "./properties.svelte";
     import Marks from "./mark.svelte";
     export let person;
-
-    // let javascript, python, c_sharp, java;
-
-    // $: if(person !== undefined){
-    //     ({ javascript, python, c_sharp, java } = person);
-    // }
-
     export let which_column;
     export let lang;
 

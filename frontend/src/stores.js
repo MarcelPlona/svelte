@@ -1,18 +1,7 @@
 import { writable,derived } from 'svelte/store';
 
-let load = true;
-fetch("http://localhost:3000/")
-.then((response) => response.json())
-.then((data2) => {
-    data.set(data2);
-    loading.set(false);
-    console.log("działa!")
-});
-
-
 
 export const data = writable([]);
-export const loading = writable(load);
 export const lang_list = writable([]);
 export const min_avg_f = writable(undefined);
 export const max_result = writable(undefined);

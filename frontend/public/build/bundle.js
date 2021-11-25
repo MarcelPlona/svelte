@@ -35,12 +35,20 @@ var app = (function () {
     function is_empty(obj) {
         return Object.keys(obj).length === 0;
     }
+    function validate_store(store, name) {
+        if (store != null && typeof store.subscribe !== 'function') {
+            throw new Error(`'${name}' is not a store with a 'subscribe' method`);
+        }
+    }
     function subscribe(store, ...callbacks) {
         if (store == null) {
             return noop;
         }
         const unsub = store.subscribe(...callbacks);
         return unsub.unsubscribe ? () => unsub.unsubscribe() : unsub;
+    }
+    function component_subscribe(component, store, callback) {
+        component.$$.on_destroy.push(subscribe(store, callback));
     }
     function append(target, node) {
         target.appendChild(node);
@@ -102,6 +110,14 @@ var app = (function () {
     let current_component;
     function set_current_component(component) {
         current_component = component;
+    }
+    function get_current_component() {
+        if (!current_component)
+            throw new Error('Function called outside component initialization');
+        return current_component;
+    }
+    function onMount(fn) {
+        get_current_component().$$.on_mount.push(fn);
     }
 
     const dirty_components = [];
@@ -856,7 +872,7 @@ var app = (function () {
     	return child_ctx;
     }
 
-    // (42:4) {:else}
+    // (35:4) {:else}
     function create_else_block$1(ctx) {
     	let person_1;
     	let t;
@@ -952,14 +968,14 @@ var app = (function () {
     		block,
     		id: create_else_block$1.name,
     		type: "else",
-    		source: "(42:4) {:else}",
+    		source: "(35:4) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (38:4) {#if which_column === "properties"}
+    // (31:4) {#if which_column === "properties"}
     function create_if_block$1(ctx) {
     	let each_blocks = [];
     	let each_1_lookup = new Map();
@@ -1031,14 +1047,14 @@ var app = (function () {
     		block,
     		id: create_if_block$1.name,
     		type: "if",
-    		source: "(38:4) {#if which_column === \\\"properties\\\"}",
+    		source: "(31:4) {#if which_column === \\\"properties\\\"}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (44:8) {#each lang as lan (lan)}
+    // (37:8) {#each lang as lan (lan)}
     function create_each_block_1(key_1, ctx) {
     	let first;
     	let marks;
@@ -1087,14 +1103,14 @@ var app = (function () {
     		block,
     		id: create_each_block_1.name,
     		type: "each",
-    		source: "(44:8) {#each lang as lan (lan)}",
+    		source: "(37:8) {#each lang as lan (lan)}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (39:8) {#each lang_names as lan (lan)}
+    // (32:8) {#each lang_names as lan (lan)}
     function create_each_block$2(key_1, ctx) {
     	let first;
     	let properties;
@@ -1143,7 +1159,7 @@ var app = (function () {
     		block,
     		id: create_each_block$2.name,
     		type: "each",
-    		source: "(39:8) {#each lang_names as lan (lan)}",
+    		source: "(32:8) {#each lang_names as lan (lan)}",
     		ctx
     	});
 
@@ -1171,7 +1187,7 @@ var app = (function () {
     			div = element("div");
     			if_block.c();
     			attr_dev(div, "class", "column svelte-1gjfuoy");
-    			add_location(div, file$2, 36, 0, 827);
+    			add_location(div, file$2, 29, 0, 665);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -1451,19 +1467,7 @@ var app = (function () {
         });
     }
 
-    let load = true;
-    fetch("http://localhost:3000/")
-    .then((response) => response.json())
-    .then((data2) => {
-        data.set(data2);
-        loading.set(false);
-        console.log("działa!");
-    });
-
-
-
     const data = writable([]);
-    const loading = writable(load);
     const lang_list = writable([]);
     const min_avg_f = writable(undefined);
     const max_result = writable(undefined);
@@ -1482,8 +1486,7 @@ var app = (function () {
         if (
             min_avg_ !== undefined &&
             min_avg_ !== null &&
-            min_avg_ >= 0 &&
-            min_avg_ <= 5
+            min_avg_ >= 0
         ) {
             for (let i = 0; i < after_filtr.length; i++) {
                 let sum = 0;
@@ -1521,7 +1524,7 @@ var app = (function () {
 
     function get_each_context$1(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[3] = list[i];
+    	child_ctx[5] = list[i];
     	return child_ctx;
     }
 
@@ -1614,8 +1617,8 @@ var app = (function () {
     		c: function create() {
     			p = element("p");
     			p.textContent = "No results...";
-    			attr_dev(p, "class", "loading svelte-plgxzk");
-    			add_location(p, file$1, 34, 12, 956);
+    			attr_dev(p, "class", "loading svelte-1jv0jta");
+    			add_location(p, file$1, 34, 12, 1044);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, p, anchor);
@@ -1647,8 +1650,8 @@ var app = (function () {
     		c: function create() {
     			p = element("p");
     			p.textContent = "Loading...";
-    			attr_dev(p, "class", "loading svelte-plgxzk");
-    			add_location(p, file$1, 32, 12, 892);
+    			attr_dev(p, "class", "loading svelte-1jv0jta");
+    			add_location(p, file$1, 32, 12, 980);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, p, anchor);
@@ -1691,7 +1694,7 @@ var app = (function () {
 
     	let each_value = /*after_filtr*/ ctx[0];
     	validate_each_argument(each_value);
-    	const get_key = ctx => /*person*/ ctx[3]._id;
+    	const get_key = ctx => /*person*/ ctx[5]._id;
     	validate_each_keys(ctx, each_value, get_each_context$1, get_key);
 
     	for (let i = 0; i < each_value.length; i += 1) {
@@ -1788,7 +1791,7 @@ var app = (function () {
     			props: {
     				which_column: "values",
     				lang: /*lang*/ ctx[2],
-    				person: /*person*/ ctx[3]
+    				person: /*person*/ ctx[5]
     			},
     			$$inline: true
     		});
@@ -1810,7 +1813,7 @@ var app = (function () {
     			ctx = new_ctx;
     			const column_changes = {};
     			if (dirty & /*lang*/ 4) column_changes.lang = /*lang*/ ctx[2];
-    			if (dirty & /*after_filtr*/ 1) column_changes.person = /*person*/ ctx[3];
+    			if (dirty & /*after_filtr*/ 1) column_changes.person = /*person*/ ctx[5];
     			column.$set(column_changes);
     		},
     		i: function intro(local) {
@@ -1848,8 +1851,8 @@ var app = (function () {
     		c: function create() {
     			div = element("div");
     			if (if_block) if_block.c();
-    			attr_dev(div, "class", "grid svelte-plgxzk");
-    			add_location(div, file$1, 24, 0, 507);
+    			attr_dev(div, "class", "grid svelte-1jv0jta");
+    			add_location(div, file$1, 24, 0, 595);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -1910,25 +1913,26 @@ var app = (function () {
     }
 
     function instance$2($$self, $$props, $$invalidate) {
+    	let $data_after_filtr;
+    	let $lang_list;
+    	validate_store(data_after_filtr, 'data_after_filtr');
+    	component_subscribe($$self, data_after_filtr, $$value => $$invalidate(3, $data_after_filtr = $$value));
+    	validate_store(lang_list, 'lang_list');
+    	component_subscribe($$self, lang_list, $$value => $$invalidate(4, $lang_list = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('Grid', slots, []);
     	let after_filtr = [];
     	let load = true;
     	let lang = [];
 
-    	loading.subscribe(_loading => {
-    		$$invalidate(1, load = _loading);
+    	onMount(() => {
+    		fetch("http://giereczka.pl/api").then(response => response.json()).then(data2 => {
+    			data.set(data2);
+    			$$invalidate(1, load = false);
+    			console.log("Fetch");
+    		});
     	});
 
-    	lang_list.subscribe(_lang_list => {
-    		$$invalidate(2, lang = _lang_list);
-    	});
-
-    	data_after_filtr.subscribe(_data_after_filtr => {
-    		$$invalidate(0, after_filtr = _data_after_filtr);
-    	});
-
-    	console.log(lang);
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
@@ -1937,12 +1941,15 @@ var app = (function () {
 
     	$$self.$capture_state = () => ({
     		Column,
-    		loading,
     		lang_list,
     		data_after_filtr,
+    		data,
+    		onMount,
     		after_filtr,
     		load,
-    		lang
+    		lang,
+    		$data_after_filtr,
+    		$lang_list
     	});
 
     	$$self.$inject_state = $$props => {
@@ -1955,7 +1962,17 @@ var app = (function () {
     		$$self.$inject_state($$props.$$inject);
     	}
 
-    	return [after_filtr, load, lang];
+    	$$self.$$.update = () => {
+    		if ($$self.$$.dirty & /*$lang_list*/ 16) {
+    			$$invalidate(2, lang = $lang_list);
+    		}
+
+    		if ($$self.$$.dirty & /*$data_after_filtr*/ 8) {
+    			$$invalidate(0, after_filtr = $data_after_filtr);
+    		}
+    	};
+
+    	return [after_filtr, load, lang, $data_after_filtr, $lang_list];
     }
 
     class Grid extends SvelteComponentDev {
@@ -1977,26 +1994,26 @@ var app = (function () {
 
     function get_each_context(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[12] = list[i];
-    	child_ctx[13] = list;
-    	child_ctx[14] = i;
+    	child_ctx[10] = list[i];
+    	child_ctx[11] = list;
+    	child_ctx[12] = i;
     	return child_ctx;
     }
 
-    // (31:8) {#each selected as lan, i (lan)}
+    // (24:8) {#each selected as lan, i (lan)}
     function create_each_block(key_1, ctx) {
     	let label;
     	let input;
     	let t0;
     	let span;
-    	let t1_value = /*lang_text*/ ctx[4][/*i*/ ctx[14]] + "";
+    	let t1_value = /*lang_text*/ ctx[4][/*i*/ ctx[12]] + "";
     	let t1;
     	let t2;
     	let mounted;
     	let dispose;
 
     	function input_change_handler() {
-    		/*input_change_handler*/ ctx[6].call(input, /*i*/ ctx[14]);
+    		/*input_change_handler*/ ctx[6].call(input, /*i*/ ctx[12]);
     	}
 
     	const block = {
@@ -2010,22 +2027,22 @@ var app = (function () {
     			t1 = text(t1_value);
     			t2 = space();
     			attr_dev(input, "type", "checkbox");
-    			input.__value = /*lan*/ ctx[12];
+    			input.__value = /*lan*/ ctx[10];
     			input.value = input.__value;
     			attr_dev(input, "class", "svelte-307a49");
     			/*$$binding_groups*/ ctx[7][0].push(input);
-    			add_location(input, file, 32, 16, 778);
+    			add_location(input, file, 25, 16, 612);
     			attr_dev(span, "class", "svelte-307a49");
-    			add_location(span, file, 38, 16, 978);
+    			add_location(span, file, 31, 16, 812);
     			attr_dev(label, "class", "svelte-307a49");
-    			add_location(label, file, 31, 12, 753);
+    			add_location(label, file, 24, 12, 587);
     			this.first = label;
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, label, anchor);
     			append_dev(label, input);
     			input.checked = ~/*lang*/ ctx[0].indexOf(input.__value);
-    			input.checked = /*visible*/ ctx[3][/*i*/ ctx[14]];
+    			input.checked = /*visible*/ ctx[3][/*i*/ ctx[12]];
     			append_dev(label, t0);
     			append_dev(label, span);
     			append_dev(span, t1);
@@ -2044,7 +2061,7 @@ var app = (function () {
     			}
 
     			if (dirty & /*visible, selected*/ 40) {
-    				input.checked = /*visible*/ ctx[3][/*i*/ ctx[14]];
+    				input.checked = /*visible*/ ctx[3][/*i*/ ctx[12]];
     			}
     		},
     		d: function destroy(detaching) {
@@ -2059,7 +2076,7 @@ var app = (function () {
     		block,
     		id: create_each_block.name,
     		type: "each",
-    		source: "(31:8) {#each selected as lan, i (lan)}",
+    		source: "(24:8) {#each selected as lan, i (lan)}",
     		ctx
     	});
 
@@ -2079,7 +2096,7 @@ var app = (function () {
     	let dispose;
     	let each_value = /*selected*/ ctx[5];
     	validate_each_argument(each_value);
-    	const get_key = ctx => /*lan*/ ctx[12];
+    	const get_key = ctx => /*lan*/ ctx[10];
     	validate_each_keys(ctx, each_value, get_each_context, get_key);
 
     	for (let i = 0; i < each_value.length; i += 1) {
@@ -2102,17 +2119,17 @@ var app = (function () {
     			t1 = space();
     			input1 = element("input");
     			attr_dev(div, "class", "checkboxes svelte-307a49");
-    			add_location(div, file, 29, 4, 673);
+    			add_location(div, file, 22, 4, 507);
     			attr_dev(input0, "placeholder", "Maks wyników");
     			attr_dev(input0, "type", "number");
     			attr_dev(input0, "class", "svelte-307a49");
-    			add_location(input0, file, 42, 4, 1062);
+    			add_location(input0, file, 35, 4, 896);
     			attr_dev(input1, "placeholder", "Min średnia");
     			attr_dev(input1, "type", "number");
     			attr_dev(input1, "class", "svelte-307a49");
-    			add_location(input1, file, 43, 4, 1150);
+    			add_location(input1, file, 36, 4, 984);
     			attr_dev(header, "class", "svelte-307a49");
-    			add_location(header, file, 28, 0, 659);
+    			add_location(header, file, 21, 0, 493);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -2185,14 +2202,6 @@ var app = (function () {
     function instance$1($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('Filter', slots, []);
-    	let persons_data = [];
-    	let after_filtr = [];
-
-    	data.subscribe(_data => {
-    		persons_data = _data;
-    		after_filtr = _data;
-    	});
-
     	let visible = [true, true, true, true];
     	let lang = ["javascript", "python", "c_sharp", "java"];
     	let lang_text = ["Javascript", "Python", "C#", "Java"];
@@ -2226,12 +2235,9 @@ var app = (function () {
     	}
 
     	$$self.$capture_state = () => ({
-    		data,
     		lang_list,
     		min_avg_f,
     		max_result,
-    		persons_data,
-    		after_filtr,
     		visible,
     		lang,
     		lang_text,
@@ -2241,8 +2247,6 @@ var app = (function () {
     	});
 
     	$$self.$inject_state = $$props => {
-    		if ('persons_data' in $$props) persons_data = $$props.persons_data;
-    		if ('after_filtr' in $$props) after_filtr = $$props.after_filtr;
     		if ('visible' in $$props) $$invalidate(3, visible = $$props.visible);
     		if ('lang' in $$props) $$invalidate(0, lang = $$props.lang);
     		if ('lang_text' in $$props) $$invalidate(4, lang_text = $$props.lang_text);

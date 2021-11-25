@@ -1,14 +1,7 @@
 <script>
    
-    import { data, lang_list, min_avg_f, max_result } from "./stores.js";
+    import { lang_list, min_avg_f, max_result } from "./stores.js";
 
-    let persons_data = [];
-    let after_filtr = [];
-
-    data.subscribe((_data) => {
-        persons_data = _data;
-        after_filtr = _data;
-    });
 
     let visible = [true, true, true, true];
     let lang = ["javascript", "python", "c_sharp", "java"];

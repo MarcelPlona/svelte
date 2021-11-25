@@ -1,24 +1,24 @@
 <script>
     import Column from "./column.svelte";
-    import { loading, lang_list, data_after_filtr } from "./stores.js";
+    import { lang_list, data_after_filtr, data } from "./stores.js";
+    import { onMount } from "svelte";
 
     let after_filtr = [];
     let load = true;
     let lang = [];
 
-    loading.subscribe((_loading) => {
-        load = _loading;
+    onMount(() => {
+        fetch("http://giereczka.pl/api")
+            .then((response) => response.json())
+            .then((data2) => {
+                data.set(data2);
+                load = false;
+                console.log("Fetch");
+            });
     });
 
-    lang_list.subscribe((_lang_list) => {
-        lang = _lang_list;
-    });
-
-    data_after_filtr.subscribe((_data_after_filtr) => {
-        after_filtr =  _data_after_filtr;
-    });
-
-    console.log(lang);
+    $: lang = $lang_list;
+    $: after_filtr = $data_after_filtr;
 
 </script>
 
@@ -54,6 +54,5 @@
         top: 50vh;
         left: 50vw;
         transform: translate(-50%, -150%);
-        
     }
 </style>

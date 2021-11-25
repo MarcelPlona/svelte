@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 const mg = require('mongodb').MongoClient;
-const url = "mongodb+srv://marek:pieczarek@cluster00.hve3n.mongodb.net/table?retryWrites=true&w=majority";
+const url = "mongodb+srv://user:pass@cluster00.hve3n.mongodb.net/table?retryWrites=true&w=majority";
 
 const dbname = "table";
 

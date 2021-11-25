@@ -5,21 +5,18 @@
     export let person;
     export let which_column;
     export let lang;
+    export let techs_view;
+    export let techs;
 
     let lang_names = [];
 
+    //wyświetlania nazw wierszy
+
     function text(arr) {
         lang_names = [];
-
-        for (let i = 0; i < arr.length; i++) {
-            if (arr[i] == "c_sharp") {
-                lang_names.push("C#");
-            } else {
-                lang_names.push(
-                    arr[i].charAt(0).toUpperCase() + arr[i].substr(1)
-                );
-            }
-        }
+        arr.forEach((element) => {
+          lang_names.push(techs_view[techs.indexOf(element)]);
+        });
     }
 
     $: {
@@ -32,10 +29,10 @@
         {#each lang_names as lan (lan)}
             <Properties lang={lan} />
         {/each}
-    {:else}
+    {:else if lang.length}
         <Person profile={person.img} />
-        {#each lang as lan (lan)}
-            <Marks mark={person[lan]} />
+        {#each lang as lan, i (lan)}
+            <Marks tech={lan} person_id={person._id} mark={person[lan]} />
         {/each}
     {/if}
 </div>

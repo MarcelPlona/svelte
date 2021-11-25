@@ -1,71 +1,116 @@
 <script>
-   
-    import { lang_list, min_avg_f, max_result } from "./stores.js";
+    import { which_elem_is_editing, tech_update } from "./store.js";
+    import { createEventDispatcher } from "svelte";
+    const dispatch = createEventDispatcher();
+    let to_edit = 0;
+    export let error = "";
+    export let which_mode;
+    export let techs = [];
+    export let techs_view = [];
 
+    let tech_in_use = [];
 
-    let visible = [true, true, true, true];
-    let lang = ["javascript", "python", "c_sharp", "java"];
-    let lang_text = ["Javascript", "Python", "C#", "Java"];
-    let filtr_users_number;
+    let selected_techs = [...techs];
+    let last = techs;
+
     let min_avg;
+    let max_results;
 
-    let selected = lang;
+    function update_values(techs_val) {
+        if (last != techs_val) {
+            tech_in_use = [];
+            tech_in_use = techs_val.map(() => {
+                return true;
+            });
+            selected_techs = [...techs_val];
+            $tech_update = [...techs_val];
+        }
+        last = techs_val;
+    }
 
-    //zapisywanie filtrów do writable
+    $: update_values(techs);
 
-    $: max_result.set(filtr_users_number);
-    $: min_avg_f.set(min_avg);
-    $: lang_list.set(lang);
+    function edit_and_save() {
 
+        dispatch("edit", {
+            value: to_edit,
+        });
+    }
+
+    function filter_values() {
+        dispatch("filter", {
+            max_results: max_results,
+            min_avg,
+            min_avg,
+            selected_techs,
+            selected_techs,
+        });
+    }
+   
+    
 </script>
 
 <header>
-    <div class="checkboxes">
-        {#each selected as lan, i (lan)}
-            <label>
-                <input
-                    type="checkbox"
-                    bind:group={lang}
-                    bind:checked={visible[i]}
-                    value={lan}
-                />
-                <span>{lang_text[i]}</span>
-            </label>
-        {/each}
-    </div>
-    <input placeholder="Maks wyników" bind:value={filtr_users_number} type="number" />
-    <input placeholder="Min średnia" bind:value={min_avg} type="number" />
+    {#if !which_mode}
+    {#each techs as tech, i (tech)}
+        <input
+            type="checkbox"
+            bind:checked={tech_in_use[i]}
+            bind:group={selected_techs}
+            value={tech}
+        />
+        {techs_view[i]}
+    {/each}
+    <input type="number" bind:value={max_results} />
+    <input type="number" bind:value={min_avg} />
+    <input type="submit" on:click={filter_values} value="filter" />
+    {#if $which_elem_is_editing == "properties"}
+        <input type="text" bind:value={to_edit} />
+    {:else if $which_elem_is_editing == "mark"}
+        <input type="number" bind:value={to_edit} />
+    {:else if  $which_elem_is_editing == "date"}
+        <input type="date" bind:value={to_edit} />
+    {/if}
+    <input type="submit" on:click={edit_and_save} value="edit" />
+    <h3 class="error">{error}</h3>
+    {:else}
+    <h3 class="info">Select view tables to see filters</h3>
+    {/if}
 </header>
 
 <style>
     header {
-        width: 100%;
+        min-width: 100vw;
         height: 60px;
         background-color: rgb(236, 91, 38);
-        left: 0;
         display: flex;
-        position: fixed;
         align-items: center;
-        padding-left: 30px;
+        position: fixed;
+        left:0;
+        top:0;
+        z-index: 2;
     }
 
-    .checkboxes label {
-        display: inline-block;
-        padding-right: 10px;
-        white-space: nowrap;
-        color:white;
-        font-weight: 600;
-        margin: 0 5px;
-        font-size: 20px;
-    }
-    input[type=number]{
-        margin:0 20px;
+    header input[type="number"] {
+        width: 130px;
+        height: 20px;
     }
 
-    .checkboxes input {
-        vertical-align: middle;
+    header input {
+        margin-left: 40px;
     }
-    .checkboxes label span {
-        vertical-align: middle;
+
+    header input[type="submit"] {
+        width: 80px;
+        height: 25px;
+    }
+    .error {
+        color: rgb(165, 0, 0);
+        padding: 0;
+        margin: 0;
+        margin-left: 20px;
+    }
+    .info {
+        margin:0 auto;
     }
 </style>

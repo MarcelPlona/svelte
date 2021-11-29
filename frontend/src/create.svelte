@@ -1,9 +1,5 @@
 <script>
-    import {
-        load,
-        tech_create,
-        person_list_create
-    } from "./store.js";
+    import { load, tech_create, person_list_create } from "./store.js";
 
     export let data;
     export let person_create;
@@ -67,7 +63,7 @@
 
         //dodanie nowej tabeli
 
-        fetch("http://localhost:3000/add/", requestOptions)
+        fetch("http://giereczka.pl/api/add/", requestOptions)
             .then((response) => response.json())
             .then((data_org) => {
                 if (data_org.res == "y") {
@@ -81,7 +77,7 @@
 <div class="on_inputs">
     <div>Technology:</div>
     {#each list_of_tech as tech, i (list_of_tech[i])}
-        <div>
+        <div class="row">
             <input
                 type="checkbox"
                 bind:checked={which_tech_create[i]}
@@ -89,20 +85,19 @@
                 value={tech}
             />
 
-            {list_of_tech_view[i]}
+            <div>{list_of_tech_view[i]}</div>
         </div>
     {/each}
     <div>Persons:</div>
     {#each data.persons as person, i (person._id)}
-        <div>
+        <div class="row">
             <input
                 type="checkbox"
                 bind:checked={person_create[i]}
                 bind:group={$person_list_create}
                 value={person}
             />
-
-            {person.name}
+            <div>{person.name}</div>
         </div>
     {/each}
     <input type="text" placeholder="Tabele name" bind:value={project_name} />
@@ -114,6 +109,12 @@
 </div>
 
 <style>
+    .row {
+        display: flex;
+        align-items: center;
+        font-size: 15px;
+    }
+
     .on_inputs {
         width: 70%;
         height: auto;
@@ -128,7 +129,7 @@
     }
 
     .on_inputs input[type="submit"] {
-        margin-top: 20px;
+        margin: 20px 0;
     }
 
     .error {
@@ -137,5 +138,40 @@
         padding: 0;
         margin: 0;
         margin-top: 10px;
+    }
+
+    @media only screen and (max-width: 900px) {
+        input[type="checkbox"] {
+            margin-top: 0px;
+            transform: scale(0.5);
+        }
+
+        .on_inputs {
+            width: 50%;
+            font-size: 15px;
+        }
+
+        .on_inputs h3{
+            font-size: 12px;
+        }
+
+        .row {
+            font-size: 10px;
+        }
+
+        .on_inputs input[type="text"] {
+            margin-top: 5px;
+            font-size: 10px;
+        }
+
+        .on_inputs input[type="date"] {
+            margin-top: 5px;
+            font-size: 8px;
+        }
+
+        .on_inputs input[type="submit"] {
+            margin: 5px 0;
+            font-size: 10px;
+        }
     }
 </style>

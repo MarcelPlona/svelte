@@ -31,18 +31,20 @@
 
 <style>
     .properties {
-        padding: 0 20px;
-        height: 60px;
+        padding: 0 2vw;
+        height: 3.5vw;
         background-color: rgb(255, 70, 70);
-        margin: 25px 0 ;
+        margin: 1.25vw 0 ;
         display: flex;
         justify-content: center;
         align-items: center;
-        border-radius: 10px;
+        border-radius: 0.5vw;
+        cursor: pointer;
+        font-size: 1.2vw;
     }
 
     .properties:first-of-type {
-        margin-top:125px;
+        margin-top:6vw;
     }
 
     .properties_text {

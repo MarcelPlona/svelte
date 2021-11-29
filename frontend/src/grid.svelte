@@ -13,16 +13,13 @@
         change_value,
         tech_create,
         projects_names,
-        load
+        load,
     } from "./store.js";
 
     let list_of_tech = ["javascript", "java", "python", "c_sharp"];
     let list_of_tech_view = ["Javascript", "Java", "Python", "C#"];
 
     let person_create = [];
-
-
-   
 
     let selected_project;
     let project_data = [];
@@ -45,7 +42,7 @@
     onMount(() => {
         //załadowanie tabeli do tworzenia innych tabel
 
-        fetch("http://localhost:3000/")
+        fetch("http://giereczka.pl/api/")
             .then((response) => response.json())
             .then((data_org) => {
                 $load = false;
@@ -58,20 +55,19 @@
 
         //załadowanie pozostałych tabel do edycji i podglądu
 
-        fetch("http://localhost:3000/projects")
+        fetch("http://giereczka.pl/api/projects")
             .then((response) => response.json())
             .then((data_org) => {
                 $projects_names = data_org;
             });
     });
 
-
     //zmiana lub wybor tabeli z "View table"
 
     function change_projects(name) {
         selected_project = name;
         load_project = true;
-        fetch(`http://localhost:3000/projects/${selected_project}`)
+        fetch(`http://giereczka.pl/api/projects/${selected_project}`)
             .then((response) => response.json())
             .then((data_org) => {
                 load_project = false;
@@ -86,7 +82,6 @@
     function save_changes(e) {
         error_message_filter = "";
         if ($which_elem_is_editing == "mark") {
-
             //walidacja ocen
 
             if (e.detail.value < 0 || e.detail.value > 5 || !e.detail.value) {
@@ -116,7 +111,7 @@
 
             //zapis do bazy danych zmian
 
-            fetch("http://localhost:3000/change-mark/", requestOptions)
+            fetch("http://giereczka.pl/api/change-mark/", requestOptions)
                 .then((response) => response.json())
                 .then((data_org) => {
                     if (data_org.res == "y") {
@@ -126,7 +121,6 @@
                     }
                 });
         } else if ($which_elem_is_editing == "properties") {
-
             //walidacja wierszy
 
             if (!e.detail.value) {
@@ -168,9 +162,9 @@
                 }),
             };
 
-             //zapis do bazy danych zmian
+            //zapis do bazy danych zmian
 
-            fetch("http://localhost:3000/change-tech-view/", requestOptions)
+            fetch("http://giereczka.pl/api/change-tech-view/", requestOptions)
                 .then((response) => response.json())
                 .then((data_org) => {
                     if (data_org.res == "y") {
@@ -180,8 +174,7 @@
                     }
                 });
         } else if ($which_elem_is_editing == "date") {
-
-             //walidacja daty zaczęcia i końca
+            //walidacja daty zaczęcia i końca
 
             if (!e.detail.value) {
                 error_message_filter = "Value can't be empty";
@@ -189,7 +182,7 @@
             }
 
             //zmiana w lokalnych zmiennych
-            
+
             if ($change_value == "start") {
                 after_filter.data_start = e.detail.value;
             } else if ($change_value == "end") {
@@ -206,9 +199,9 @@
                 }),
             };
 
-             //zapis do bazy danych zmian
+            //zapis do bazy danych zmian
 
-            fetch("http://localhost:3000/change-tech-view/", requestOptions)
+            fetch("http://giereczka.pl/api/change-tech-view/", requestOptions)
                 .then((response) => response.json())
                 .then((data_org) => {
                     if (data_org.res == "y") {
@@ -273,7 +266,6 @@
     function toggle(value) {
         which_mode = value;
     }
-
 </script>
 
 <Filter
@@ -285,11 +277,9 @@
     on:filter={filter_values}
 />
 
-
 <div class="on_content">
     {#if !$load}
         <div class="create_table">
-
             <!-- Zmiana pomiędzy edycja a zapisywaniem -->
             <div
                 class="options"
@@ -308,12 +298,9 @@
                 <p>View tables</p>
             </div>
             {#if which_mode}
-               
-
                 <!-- formularz do tworzenia tabel -->
 
-                <Create {data} {person_create}/>
-
+                <Create {data} {person_create} />
             {:else}
                 <div class="on_tables">
                     <div>Select:</div>
@@ -328,47 +315,58 @@
     {:else if $load}
         <div class="loading">loading...</div>
     {/if}
+</div>
+
+{#if selected_project && !load_project && !which_mode}
     <div class="flexbox">
-        {#if selected_project && !load_project && !which_mode}
-            <!-- Tabela do edycji i podglądu -->
-            <TableData data={after_filter} />
-            <div class="table">
-                {#if tech_list_in_use.length}
-                    <Table
-                        data={project_data}
-                        tech_create={tech_list_in_use}
-                        person_list={after_filter.persons}
-                    />
-                {:else}
-                    <div class="loading">No results</div>
-                {/if}
-            </div>
-        {:else if selected_project && !which_mode}
-            <div class="loading">loading...</div>
-            <!-- Tabela podglądu do zapisawania -->
-        {:else if data.hasOwnProperty("persons")}
-            {#if $tech_create.length && $person_list_create.length}
-                <Table {data} tech_create={$tech_create} person_list={$person_list_create} />
-            {:else}
-                <div class="loading">Select technologies and people</div>
-            {/if}
+        <!-- Tabela do edycji i podglądu -->
+        <TableData data={after_filter} />
+        {#if tech_list_in_use.length && after_filter.persons.length}
+            <Table
+                data={project_data}
+                tech_create={tech_list_in_use}
+                person_list={after_filter.persons}
+            />
+        {:else}
+            <div class="loading select_check">No results</div>
         {/if}
     </div>
-</div>
+{:else if selected_project && !which_mode}
+    <div class="flexbox">
+        <div class="loading ">loading...</div>
+        <!-- Tabela podglądu do zapisawania -->
+    </div>
+{:else if data.hasOwnProperty("persons")}
+    <div class="flexbox view">
+        {#if $tech_create.length && $person_list_create.length}
+            <Table
+                {data}
+                tech_create={$tech_create}
+                person_list={$person_list_create}
+            />
+        {:else}
+            <div class="loading select_check">
+                Select technologies and people
+            </div>
+        {/if}
+    </div>
+{/if}
 
 <style>
     .create_table {
-        min-width: 15%;
-        width: 15%;
-        height: calc(100vh - 40px);
+        width: 200px;
+        height: calc(100vh - 60px);
         background-color: chocolate;
         overflow-y: auto;
+        position: fixed;
+        top: 60px;
+        left: 0;
     }
 
     .on_content {
         display: flex;
-        margin-top: 60px;
     }
+
     .options {
         width: 100%;
         background-color: white;
@@ -393,8 +391,6 @@
         border-bottom: 2px solid rgb(202, 202, 202);
     }
 
-
-
     .on_tables {
         width: 70%;
         height: auto;
@@ -413,15 +409,60 @@
 
     .flexbox {
         display: flex;
-        flex-direction: column;
+        position: fixed;
+        top: calc(60px + 3vw);
+        left: 200px;
+        height: calc(100vh - 60px - 3vw);
+        width: calc(100vw - 200px);
+        overflow-x: auto;
     }
 
     .loading {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        font-size: 40px;
+        margin: 0 auto;
+        margin-top: 50vh;
+        transform: translate(0, -50%);
+        text-align: center;
+        font-size: 3vw;
         font-weight: 700;
+        z-index: 3;
+    }
+
+    .select_check {
+        margin-top: calc(50vh - 60px);
+        transform: translate(0, -50%);
+        transform: none;
+    }
+
+    .view{
+        top:60px;
+    }
+
+    @media only screen and (max-width: 800px) {
+        .create_table {
+            width: 150px;
+        }
+
+        .on_tables div {
+            margin-top: 3px;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .on_tables {
+            margin-top: 10px;
+        }
+
+        .options p {
+            font-size: 12px;
+        }
+
+        .options {
+            height: 30px;
+        }
+
+        .flexbox{
+            left:150px;
+            width:calc(100vw - 150px);
+        }
     }
 </style>

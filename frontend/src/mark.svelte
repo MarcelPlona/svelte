@@ -103,19 +103,20 @@
 
 <style>
     .mark_box {
-        width: 90px;
-        height: 90px;
+        width: 5vw;
+        height: 5vw;
         color: rgb(255, 255, 255);
         font-weight: 700;
-        font-size: 36px;
-        border-radius: 20px;
+        font-size: 2vw;
+        border-radius: 1vw;
         box-sizing: border-box;
-        border: solid 6px;
+        border: solid 0.5vw;
         display: flex;
         align-items: center;
         justify-content: center;
         position: relative;
-        margin: 10px 0;
+        margin: 0.5vw 0;
+        cursor: pointer;
     }
 
     .verylow {

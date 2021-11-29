@@ -16,7 +16,7 @@ app.use((req, res, next) => {
 
 
 
-app.post('/add', (req, res) => {
+app.post('/api/add', (req, res) => {
 
     if (req.body.data !== undefined) {
         mg.connect(url, {}, (error, client) => {
@@ -37,7 +37,7 @@ app.post('/add', (req, res) => {
 
 });
 
-app.get('/projects/:project', (req, res) => {
+app.get('/api/projects/:project', (req, res) => {
 
     mg.connect(url, {}, (error, client) => {
         if (error) {
@@ -52,7 +52,7 @@ app.get('/projects/:project', (req, res) => {
     });
 });
 
-app.all('/change-mark', (req, res) => {
+app.all('/api/change-mark', (req, res) => {
     if (req.body.name !== undefined) {
         mg.connect(url, {}, (error, client) => {
             if (error) {
@@ -77,7 +77,7 @@ app.all('/change-mark', (req, res) => {
     }
 });
 
-app.all('/change-tech-view', (req, res) => {
+app.all('/api/change-tech-view', (req, res) => {
     if (req.body.name !== undefined) {
         mg.connect(url, {}, (error, client) => {
             if (error) {
@@ -113,7 +113,7 @@ app.all('/change-tech-view', (req, res) => {
 
 
 
-app.get('/projects', (req, res) => {
+app.get('/api/projects', (req, res) => {
 
     mg.connect(url, {}, (error, client) => {
         if (error) {
@@ -130,7 +130,7 @@ app.get('/projects', (req, res) => {
 });
 
 
-app.all('*', (req, res) => {
+app.all('/api', (req, res) => {
 
     mg.connect(url, {}, (error, client) => {
         if (error) {

@@ -9,7 +9,7 @@
     export let techs;
 
     let lang_names = [];
-
+    
     //wyświetlania nazw wierszy
 
     function text(arr) {
@@ -41,8 +41,13 @@
     .column {
         display: flex;
         flex-direction: column;
-        margin: 0 20px;
+        margin: 0 1vw;
         position: relative;
         align-items: center;
+        margin-top: 20px;
+    }
+
+    .column:last-of-type{
+        margin-right: 20px;
     }
 </style>

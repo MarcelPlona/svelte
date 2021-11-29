@@ -7,8 +7,8 @@
 
 <style>
     .person{
-        width:100px;
-        height: 100px;
-        border-radius: 100px;
+        width:5vw;
+        height: 5vw;
+        border-radius: 5vw;
     }
 </style>

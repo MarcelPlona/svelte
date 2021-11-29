@@ -1,11 +1,11 @@
 <script>
-        import Column from "./column.svelte";
-        export let data;
-        export let tech_create;
-        export let person_list;
+    import Column from "./column.svelte";
+    export let data;
+    export let tech_create;
+    export let person_list;
 </script>
 
-<div class="table">
+
     <Column
         techs={data.tech_list}
         techs_view={data.tech_list_view}
@@ -21,13 +21,6 @@
             {person}
         />
     {/each}
-</div>
 
-<style>
 
-.table {
-        display: flex;
-        margin-top: 20px;
-    }
 
-</style>

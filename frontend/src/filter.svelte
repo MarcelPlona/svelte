@@ -1,12 +1,23 @@
 <script>
-    import { which_elem_is_editing, tech_update } from "./store.js";
+    import {
+        which_elem_is_editing,
+        tech_update,
+        change_value,
+        project_data,
+        after_filter,
+        tech_view,
+        mark_props,
+        tech_list_in_use
+    } from "./store.js";
     import { createEventDispatcher } from "svelte";
+    import { updateProjectData } from "./updateProjectData.js";
     const dispatch = createEventDispatcher();
     let to_edit;
     export let error = "";
     export let which_mode;
     export let techs = [];
     export let techs_view = [];
+    export let name = "";
 
     let tech_in_use = [];
 
@@ -31,9 +42,66 @@
     $: update_values(techs);
 
     function edit_and_save() {
+        let new_data = updateProjectData(
+            to_edit,
+            $which_elem_is_editing,
+            name,
+            $change_value,
+            $tech_view,
+            $mark_props
+        );
+
+        if ($project_data.tech_list_view.indexOf(new_data.value.value) != -1) {
+                new_data.err = "Value cannot be repeated";
+            }
+
         dispatch("edit", {
-            value: to_edit,
+            data: new_data
         });
+
+        if (new_data.err) {
+            return;
+        }
+
+        if ($which_elem_is_editing == "mark") {
+            //zmiana w lokalnych zmiennych
+
+            let value_index = $project_data.persons
+                .map((e) => e._id)
+                .indexOf($mark_props[0].toString());
+
+            $project_data.persons[value_index][$mark_props[1]] = new_data.value.value;
+            $after_filter.persons[value_index][$mark_props[1]] = new_data.value.value;
+        } else if ($which_elem_is_editing == "properties") {
+            //zmiana w lokalnych zmiennych
+
+            $project_data.tech_list_view[
+                $project_data.tech_list_view.indexOf($tech_view)
+            ] = new_data.value.value;
+            $after_filter.tech_list_view[
+                $after_filter.tech_list_view.indexOf($tech_view)
+            ] = new_data.value.value;
+
+            $tech_list_in_use.forEach((value, i) => {
+                $tech_update.forEach((new_value) => {
+                    if ($tech_list_in_use[i] == new_value) {
+                        $tech_list_in_use[i] = new_value;
+                    }
+                });
+            });
+
+            $tech_list_in_use = $tech_list_in_use;
+        } else if ($which_elem_is_editing == "date") {
+            //zmiana w lokalnych zmiennych
+
+            if ($change_value == "start") {
+                $project_data.data_start = new_data.value.value;
+                $after_filter.data_start = new_data.value.value;
+            } else if ($change_value == "end") {
+                $project_data.data_end = new_data.value.value;
+                $after_filter.data_end = new_data.value.value;
+            }
+        }
     }
 
     function filter_values() {
@@ -56,7 +124,7 @@
                 bind:group={selected_techs}
                 value={tech}
             />
-        <div>{techs_view[i]}</div>
+            <div>{techs_view[i]}</div>
         {/each}
         <input
             type="number"
@@ -139,7 +207,7 @@
             font-size: 10px;
         }
 
-        header div{
+        header div {
             font-size: 10px;
         }
 
@@ -153,11 +221,10 @@
             font-size: 10px;
         }
         .error {
-            font-size:15px;
+            font-size: 15px;
             margin-left: 10px;
         }
     }
-
 
     @media only screen and (min-width: 2000px) {
         header input[type="number"] {
@@ -183,7 +250,7 @@
             font-size: 20px;
         }
 
-        header div{
+        header div {
             font-size: 20px;
         }
 
@@ -197,8 +264,7 @@
             font-size: 20px;
         }
         .error {
-
-            font-size:25px;
+            font-size: 25px;
             margin-left: 20px;
         }
     }

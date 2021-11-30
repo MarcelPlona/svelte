@@ -11,3 +11,6 @@ export const load = writable(true);
 export const tech_create = writable([]);
 export const person_list_create = writable([]);
 export const projects_names = writable([]);
+export const project_data = writable([]);
+export const after_filter = writable([]);
+export const tech_list_in_use = writable([]);

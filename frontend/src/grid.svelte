@@ -8,11 +8,14 @@
         mark_props,
         which_elem_is_editing,
         person_list_create,
+        tech_list_in_use,
         tech_view,
         tech_update,
         change_value,
         tech_create,
         projects_names,
+        project_data,
+        after_filter,
         load,
     } from "./store.js";
 
@@ -22,8 +25,6 @@
     let person_create = [];
 
     let selected_project;
-    let project_data = [];
-    let after_filter = [];
 
     let data = [];
     let load_project = false;
@@ -34,8 +35,6 @@
 
     let data_start = "2021-11-01";
     let data_end = "2021-11-01";
-
-    let tech_list_in_use = [];
 
     let which_mode = true;
 
@@ -71,9 +70,14 @@
             .then((response) => response.json())
             .then((data_org) => {
                 load_project = false;
-                project_data = data_org[0];
-                after_filter = JSON.parse(JSON.stringify(project_data));
-                tech_list_in_use = project_data.tech_list;
+                $project_data = data_org[0];
+                $after_filter = Object.assign({}, data_org[0]);
+                $after_filter.persons = [];
+                data_org[0].persons.forEach((elem) => {
+                    $after_filter.persons.push(elem);
+                });
+
+                $tech_list_in_use = $project_data.tech_list;
             });
     }
 
@@ -81,127 +85,26 @@
 
     function save_changes(e) {
         error_message_filter = "";
-        if ($which_elem_is_editing == "mark") {
-            //walidacja ocen
+        console.log(e.detail.data);
 
-            if (e.detail.value < 0 || e.detail.value > 5 || !e.detail.value) {
-                error_message_filter = "Value must be between 0 and 5";
-                return;
-            }
+        //walidacja
 
-            let value_index = project_data.persons
-                .map((e) => e._id)
-                .indexOf($mark_props[0].toString());
-
-            //zmiana w lokalnych zmiennych
-
-            project_data.persons[value_index][$mark_props[1]] = e.detail.value;
-            after_filter.persons[value_index][$mark_props[1]] = e.detail.value;
-
+        if (e.detail.data.err) {
+            error_message_filter = e.detail.data.err;
+            return;
+        } else {
             const requestOptions = {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    value: e.detail.value,
-                    person_id: $mark_props[0],
-                    tech: $mark_props[1],
-                    name: project_data.name,
-                }),
+                body: JSON.stringify(e.detail.data.value),
             };
 
             //zapis do bazy danych zmian
 
-            fetch("http://giereczka.pl/api/change-mark/", requestOptions)
-                .then((response) => response.json())
-                .then((data_org) => {
-                    if (data_org.res == "y") {
-                        console.log("Działa");
-                    } else {
-                        console.log("Błąd!");
-                    }
-                });
-        } else if ($which_elem_is_editing == "properties") {
-            //walidacja wierszy
-
-            if (!e.detail.value) {
-                error_message_filter = "Value can't be empty";
-                return;
-            }
-            if (project_data.tech_list_view.indexOf(e.detail.value) != -1) {
-                error_message_filter = "Value cannot be repeated";
-                return;
-            }
-            let old_value = $tech_view;
-
-            //zmiana w lokalnych zmiennych
-
-            project_data.tech_list_view[
-                project_data.tech_list_view.indexOf($tech_view)
-            ] = e.detail.value;
-            after_filter.tech_list_view[
-                after_filter.tech_list_view.indexOf($tech_view)
-            ] = e.detail.value;
-
-            tech_list_in_use.forEach((value, i) => {
-                $tech_update.forEach((new_value) => {
-                    if (tech_list_in_use[i] == new_value) {
-                        tech_list_in_use[i] = new_value;
-                    }
-                });
-            });
-
-            tech_list_in_use = tech_list_in_use;
-
-            const requestOptions = {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    value: e.detail.value,
-                    old_value: old_value,
-                    name: project_data.name,
-                }),
-            };
-
-            //zapis do bazy danych zmian
-
-            fetch("http://giereczka.pl/api/change-tech-view/", requestOptions)
-                .then((response) => response.json())
-                .then((data_org) => {
-                    if (data_org.res == "y") {
-                        console.log("Działa");
-                    } else {
-                        console.log("Błąd!");
-                    }
-                });
-        } else if ($which_elem_is_editing == "date") {
-            //walidacja daty zaczęcia i końca
-
-            if (!e.detail.value) {
-                error_message_filter = "Value can't be empty";
-                return;
-            }
-
-            //zmiana w lokalnych zmiennych
-
-            if ($change_value == "start") {
-                after_filter.data_start = e.detail.value;
-            } else if ($change_value == "end") {
-                after_filter.data_end = e.detail.value;
-            }
-
-            const requestOptions = {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    value: e.detail.value,
-                    end_or_start: $change_value,
-                    name: project_data.name,
-                }),
-            };
-
-            //zapis do bazy danych zmian
-
-            fetch("http://giereczka.pl/api/change-tech-view/", requestOptions)
+            fetch(
+                `http://giereczka.pl/api/${e.detail.data.url}`,
+                requestOptions
+            )
                 .then((response) => response.json())
                 .then((data_org) => {
                     if (data_org.res == "y") {
@@ -211,6 +114,8 @@
                     }
                 });
         }
+
+   
     }
 
     //filtrowanie tabel edycji i podgladu
@@ -221,31 +126,35 @@
 
         //sortowanie z inputow
 
-        if (tech_list_in_use.length == e.detail.selected_techs.length) {
-            tech_list_in_use = e.detail.selected_techs;
+        if ($tech_list_in_use.length == e.detail.selected_techs.length) {
+            $tech_list_in_use = e.detail.selected_techs;
         } else {
-            tech_list_in_use = e.detail.selected_techs.reverse();
+            $tech_list_in_use = e.detail.selected_techs.reverse();
         }
 
-        after_filter = JSON.parse(JSON.stringify(project_data));
+        $after_filter = Object.assign({}, $project_data);
+        $after_filter.persons = [];
+        $project_data.persons.forEach((elem) => {
+            $after_filter.persons.push(elem);
+        });
 
         //filtr minimalnej sredniej
 
         let index_to_remove = [];
 
         if (min_avg !== undefined && min_avg !== null && min_avg >= 0) {
-            after_filter.persons.forEach((element, i) => {
+            $after_filter.persons.forEach((element, i) => {
                 let sum = 0;
-                tech_list_in_use.forEach((elem) => {
+                $tech_list_in_use.forEach((elem) => {
                     sum += element[elem];
                 });
-                if (sum / tech_list_in_use.length < min_avg) {
+                if (sum / $tech_list_in_use.length < min_avg) {
                     index_to_remove.push(i);
                 }
             });
 
             while (index_to_remove.length) {
-                after_filter.persons.splice(index_to_remove.pop(), 1);
+                $after_filter.persons.splice(index_to_remove.pop(), 1);
             }
         }
 
@@ -255,9 +164,9 @@
             max_results !== null &&
             max_results !== undefined &&
             max_results >= 0 &&
-            after_filter.persons.length >= max_results
+            $after_filter.persons.length >= max_results
         ) {
-            after_filter.persons.length = max_results;
+            $after_filter.persons.length = max_results;
         }
     }
 
@@ -269,10 +178,11 @@
 </script>
 
 <Filter
+    name={$project_data.name}
     {which_mode}
     error={error_message_filter}
-    techs_view={project_data.tech_list_view}
-    techs={project_data.tech_list}
+    techs_view={$project_data.tech_list_view}
+    techs={$project_data.tech_list}
     on:edit={save_changes}
     on:filter={filter_values}
 />
@@ -320,12 +230,12 @@
 {#if selected_project && !load_project && !which_mode}
     <div class="flexbox">
         <!-- Tabela do edycji i podglądu -->
-        <TableData data={after_filter} />
-        {#if tech_list_in_use.length && after_filter.persons.length}
+        <TableData data={$after_filter} />
+        {#if $tech_list_in_use.length && $after_filter.persons.length}
             <Table
-                data={project_data}
-                tech_create={tech_list_in_use}
-                person_list={after_filter.persons}
+                data={$project_data}
+                tech_create={$tech_list_in_use}
+                person_list={$after_filter.persons}
             />
         {:else}
             <div class="loading select_check">No results</div>
@@ -433,8 +343,8 @@
         transform: none;
     }
 
-    .view{
-        top:60px;
+    .view {
+        top: 60px;
     }
 
     @media only screen and (max-width: 800px) {
@@ -460,9 +370,9 @@
             height: 30px;
         }
 
-        .flexbox{
-            left:150px;
-            width:calc(100vw - 150px);
+        .flexbox {
+            left: 150px;
+            width: calc(100vw - 150px);
         }
     }
 </style>

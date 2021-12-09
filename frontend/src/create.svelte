@@ -1,5 +1,5 @@
 <script>
-    import { load, tech_create, person_list_create } from "./store.js";
+    import { load, tech_create, person_list_create, token, logged } from "./store.js";
 
     export let data;
     export let person_create;
@@ -57,7 +57,10 @@
 
         const requestOptions = {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+                "Content-Type": "application/json",
+                authorization: `Bearer ${$token}`,
+            },
             body: JSON.stringify({ data: obj }),
         };
 
@@ -66,6 +69,10 @@
         fetch("http://giereczka.pl/api/add/", requestOptions)
             .then((response) => response.json())
             .then((data_org) => {
+                if (data_org.err) {
+                    $logged = "login";
+                    return;
+                }
                 if (data_org.res == "y") {
                     $load = false;
                 }
@@ -151,7 +158,7 @@
             font-size: 15px;
         }
 
-        .on_inputs h3{
+        .on_inputs h3 {
             font-size: 12px;
         }
 

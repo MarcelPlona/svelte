@@ -14,3 +14,5 @@ export const projects_names = writable([]);
 export const project_data = writable([]);
 export const after_filter = writable([]);
 export const tech_list_in_use = writable([]);
+export const logged = writable("yes");
+export const token = writable(undefined);

@@ -3,24 +3,19 @@
     import Create from "./create.svelte";
     import Filter from "./filter.svelte";
     import TableData from "./tableData.svelte";
+    import Logout from "./logout.svelte";
     import { onMount } from "svelte";
     import {
-        mark_props,
-        which_elem_is_editing,
         person_list_create,
         tech_list_in_use,
-        tech_view,
-        tech_update,
-        change_value,
         tech_create,
         projects_names,
         project_data,
         after_filter,
         load,
+        token,
+        logged,
     } from "./store.js";
-
-    let list_of_tech = ["javascript", "java", "python", "c_sharp"];
-    let list_of_tech_view = ["Javascript", "Java", "Python", "C#"];
 
     let person_create = [];
 
@@ -29,21 +24,24 @@
     let data = [];
     let load_project = false;
 
-    let project_name = "";
-
     let error_message_filter = "";
-
-    let data_start = "2021-11-01";
-    let data_end = "2021-11-01";
 
     let which_mode = true;
 
     onMount(() => {
         //załadowanie tabeli do tworzenia innych tabel
 
-        fetch("http://giereczka.pl/api/")
+        fetch("http://giereczka.pl/api/", {
+            headers: {
+                authorization: `Bearer ${$token}`,
+            },
+        })
             .then((response) => response.json())
             .then((data_org) => {
+                if (data_org.err) {
+                    $logged = "login";
+                    return;
+                }
                 $load = false;
                 data = data_org[0];
 
@@ -54,9 +52,17 @@
 
         //załadowanie pozostałych tabel do edycji i podglądu
 
-        fetch("http://giereczka.pl/api/projects")
+        fetch("http://giereczka.pl/api/projects", {
+            headers: {
+                authorization: `Bearer ${$token}`,
+            },
+        })
             .then((response) => response.json())
             .then((data_org) => {
+                if (data_org.err) {
+                    $logged = "login";
+                    return;
+                }
                 $projects_names = data_org;
             });
     });
@@ -66,9 +72,17 @@
     function change_projects(name) {
         selected_project = name;
         load_project = true;
-        fetch(`http://giereczka.pl/api/projects/${selected_project}`)
+        fetch(`http://giereczka.pl/api/projects/${selected_project}`, {
+            headers: {
+                authorization: `Bearer ${$token}`,
+            },
+        })
             .then((response) => response.json())
             .then((data_org) => {
+                if (data_org.err) {
+                    $logged = "login";
+                    return;
+                }
                 load_project = false;
                 $project_data = data_org[0];
                 $after_filter = Object.assign({}, data_org[0]);
@@ -95,7 +109,10 @@
         } else {
             const requestOptions = {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    authorization: `Bearer ${$token}`,
+                },
                 body: JSON.stringify(e.detail.data.value),
             };
 
@@ -107,6 +124,10 @@
             )
                 .then((response) => response.json())
                 .then((data_org) => {
+                    if (data_org.err) {
+                        $logged = "login";
+                        return;
+                    }
                     if (data_org.res == "y") {
                         console.log("Działa");
                     } else {
@@ -114,8 +135,6 @@
                     }
                 });
         }
-
-   
     }
 
     //filtrowanie tabel edycji i podgladu
@@ -186,6 +205,8 @@
     on:edit={save_changes}
     on:filter={filter_values}
 />
+
+<Logout/>
 
 <div class="on_content">
     {#if !$load}

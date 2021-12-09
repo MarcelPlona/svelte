@@ -1,14 +1,1 @@
-POST http://localhost:3000/login
-Content-Type: application/json
 
-{
-"email": "olek@vp.pl",
-"password": "qwerty"
-}
-
-###
-
-GET http://localhost:3000/daj
-authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Im9sZWtAdnAucGwiLCJwYXNzd29yZCI6InF3ZXJ0eSIsImlhdCI6MTYzODk4NzUxMX0.vLfMQL8WhUC2SbW-uGVD4il6vIwX7VOOHSHPsom5zK0
-
-###
